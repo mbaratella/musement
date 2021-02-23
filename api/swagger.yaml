@@ -1,0 +1,130 @@
+swagger: "2.0"
+info:
+  description: "Sample requests for city Forecast."
+  version: "1.0.0"
+  title: "Swagger Forecast"
+  contact:
+    email: "mbaratella@walit.it"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "api.musement.com"
+basePath: "/api/v3"
+schemes:
+- "https"
+- "http"
+paths:
+  /cities/{id}/forecast:
+    get:
+      tags:
+      - "cities"
+      summary: "Get a Forecast of a city"
+      description: ""
+      operationId: "getForecast"
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "ID of the city"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "query"
+        name: "days"
+        description: "days to retrieve from the Forceast, by default retrieve only today"
+        required: false
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Forecast"
+        "404":
+          description: "City not found"
+        "400":
+          description: "Invalid Input"
+      security:
+      - forecast_auth:
+        - "write:forecast"
+        - "read:forecast"
+    post:
+      tags:
+      - "cities"
+      summary: "Set the Forecast of a city"
+      description: ""
+      operationId: "updateForecast"
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "ID of the city"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "forecast"
+        description: "Forecast object that needs to be setted to the city"
+        required: true
+        schema:
+          $ref: "#/definitions/Forecast"
+      responses:
+        "201":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Forecast"
+        "400":
+          description: "Invalid Forecast"
+        "404":
+          description: "City not found"
+        "405":
+          description: "Validation exception"
+      security:
+      - forecast_auth:
+        - "write:forecast"
+        - "read:forecast"
+        
+securityDefinitions:
+  forecast_auth:
+    type: "oauth2"
+    authorizationUrl: "https://api.musement.com/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:forecast: "modify forecast for city"
+      read:forecast: "read a forecast for city"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  Forecast:
+    type: "object"
+    properties:
+      forecastday:
+        $ref: "#/definitions/ForecastDay"
+    xml:
+      name: "Forecast"
+  ForecastDay:
+    type: "array"
+    items:
+      type: "object"
+    xml:
+      name: "ForecastDay"
+  ApiResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
